@@ -23,8 +23,19 @@ async function run() {
     try {
         // Connect the client to the server	(optional starting in v4.7)
         await client.connect();
-        const db=client.db('Motorio')
+        const motorio=client.db('Motorio');
+        const carData=motorio.collection('carData')
         // Send a ping to confirm a successful connection
+        app.get('/carData', async (req,res)=>{
+            const cursor= carData.find()
+            const result = await cursor.toArray()
+            res.send(result)
+        })
+        app.post('/carData', async (req,res)=>{
+            const newCarData = req.body
+            const result = await carData.insertOne(newCarData);
+            res.send(result)
+        })
         await client.db("admin").command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
     } finally {
