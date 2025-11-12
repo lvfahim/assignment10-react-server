@@ -54,6 +54,16 @@ async function run() {
             res.send(result)
             
         })
+          app.get('/myCarList', async(req,res)=>{
+            const email=req.query.email
+            const quary = {}
+            if(email){
+                quary.providerEmail=email
+            }
+            const cursor = carDataCollection.find(quary)
+            const result =await cursor.toArray()
+            res.send(result)
+        })
         app.post('/carData', async (req,res)=>{
             const newCarData = req.body
             const result = await carDataCollection.insertOne(newCarData);
