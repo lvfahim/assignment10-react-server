@@ -4,12 +4,13 @@ const cors = require('cors')
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const port = process.env.PORT || 5000
 app.use(cors())
+require('dotenv').config()
 app.use(express.json())
 app.get('/', (req, res) => {
     res.send('Hello World!')
 })
 
-const uri = "mongodb+srv://Motorio:Qxw6VgKhFxAJTiA8@lvfahimnuman.wnfazhs.mongodb.net/?appName=LvFahimNuman";
+const uri = `mongodb+srv://${process.env.BD_USER}:${process.env.BD_PASS}@lvfahimnuman.wnfazhs.mongodb.net/?appName=LvFahimNuman`;
 // Qxw6VgKhFxAJTiA8
 // Motorio
 const client = new MongoClient(uri, {
