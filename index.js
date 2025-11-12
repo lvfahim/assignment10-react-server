@@ -43,7 +43,7 @@ async function run() {
             const result = await cursor.toArray()
             res.send(result)
         })
-        app.get('/myBook',async(req,res)=>{
+        app.get('/myBook', async (req, res) => {
             const cursor = carBookingCollection.find()
             const result = await cursor.toArray()
             res.send(result)
@@ -86,9 +86,9 @@ async function run() {
             const result = await cursor.toArray()
             res.send(result)
         })
-        app.delete('/carData/:id', async(req,res)=>{
+        app.delete('/carData/:id', async (req, res) => {
             const id = req.params.id
-            const quary = {_id: new ObjectId(id)}
+            const quary = { _id: new ObjectId(id) }
             const result = await carDataCollection.deleteOne(quary)
             res.send(result)
         })
@@ -97,6 +97,21 @@ async function run() {
             const result = await carDataCollection.insertOne(newCarData);
             res.send(result)
         })
+        app.patch('/carData/:id', async (req, res) => {
+            const id = req.params.id;
+            const updatedCar = req.body;
+            const query = { _id: new ObjectId(id) };
+            const update = {
+                $set: {
+                    name: updatedCar.name,
+                    category: updatedCar.category,
+                    price: updatedCar.price,
+                }
+            };
+            const result = await carDataCollection.updateOne(query, update);
+            res.send(result);
+        });
+
         await client.db("admin").command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
     } finally {
