@@ -25,6 +25,7 @@ async function run() {
         await client.connect();
         const motorio=client.db('Motorio');
         const carDataCollection=motorio.collection('carData')
+        const carListingCollection=motorio.collection('carListing')
         // Send a ping to confirm a successful connection
         app.get('/carData', async (req,res)=>{
             const cursor= carDataCollection.find()
@@ -35,6 +36,14 @@ async function run() {
             const project={category:1,price:1,name:1,providerName:1,image:1}
             const sort = {price:-1}
             const cursor = carDataCollection.find().limit(8).project(project).sort(sort)
+            const result = await cursor.toArray()
+            res.send(result)
+            
+        })
+        app.get('/carDetailsForall', async(req,res)=>{
+            const project={category:1,price:1,name:1,providerName:1,image:1}
+            const sort = {price:-1}
+            const cursor = carDataCollection.find().project(project).sort(sort)
             const result = await cursor.toArray()
             res.send(result)
             
