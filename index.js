@@ -86,6 +86,12 @@ async function run() {
             const result = await cursor.toArray()
             res.send(result)
         })
+        app.delete('/carData/:id', async(req,res)=>{
+            const id = req.params.id
+            const quary = {_id: new ObjectId(id)}
+            const result = await carDataCollection.deleteOne(quary)
+            res.send(result)
+        })
         app.post('/carData', async (req, res) => {
             const newCarData = req.body
             const result = await carDataCollection.insertOne(newCarData);
