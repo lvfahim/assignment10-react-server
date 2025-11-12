@@ -1,7 +1,7 @@
 const express = require('express')
 const app = express()
 const cors = require('cors')
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const port = process.env.PORT || 5000
 app.use(cors())
 app.use(express.json())
@@ -35,10 +35,16 @@ async function run() {
         app.get('/carDetails', async(req,res)=>{
             const project={category:1,price:1,name:1,providerName:1,image:1}
             const sort = {price:-1}
-            const cursor = carDataCollection.find().limit(8).project(project).sort(sort)
+            const cursor = carDataCollection.find().sort(sort).limit(8).project(project)
             const result = await cursor.toArray()
             res.send(result)
             
+        })
+        app.get('/carDetails/:id', async (req,res)=>{
+            const id=req.params.id;
+            const quary={_id: new ObjectId(id)}
+            const result = await carDataCollection.findOne(quary)
+            res.send(result)
         })
         app.get('/carDetailsForall', async(req,res)=>{
             const project={category:1,price:1,name:1,providerName:1,image:1}
