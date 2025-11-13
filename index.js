@@ -9,8 +9,9 @@ app.use(express.json())
 
 const admin = require("firebase-admin");
 
-const decoded = Buffer.from(process.env.FIREBASW_SERVER_BASE, "base64").toString("utf8");
-const serviceAccount = JSON.parse(decoded);
+// const decoded = Buffer.from(process.env.FIREBASW_SERVER_BASE, "base64").toString("utf8");
+// const serviceAccount = JSON.parse(decoded);
+const serviceAccount = require("./motorio-car-firebase-adminsdk-fb.json");
 
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount)
@@ -52,15 +53,19 @@ const client = new MongoClient(uri, {
 async function run() {
     try {
         // Connect the client to the server	(optional starting in v4.7)
-        await client.connect();
+        // await client.connect();
         const motorio = client.db('Motorio');
         const carDataCollection = motorio.collection('carData')
         const carBookingCollection = motorio.collection('carBooking')
         // Send a ping to confirm a successful connection
         // car Booking 
-        app.post('/carBooking', async (req, res) => {
+        app.post('/carBooking',verifyFBToken, async (req, res) => {
             const newBooking = req.body
             const result = await carBookingCollection.insertOne(newBooking)
+            const exitingCar= await carDataCollection.findOne({_id : new ObjectId(newBooking.carId)})
+            if(exitingCar){
+                const update= await carDataCollection.updateOne({_id : new ObjectId(newBooking.carId)},{$set:{status:'unavialile'}})
+            }
             res.send(result)
         })
         app.get('/myBookingList',verifyFBToken, async (req, res) => {
@@ -153,7 +158,7 @@ async function run() {
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
     } finally {
         // Ensures that the client will close when you finish/error
-        await client.close();
+        // await client.close();
     }
 }
 run().catch(console.dir);
