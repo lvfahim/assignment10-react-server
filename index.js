@@ -9,7 +9,8 @@ app.use(express.json())
 
 const admin = require("firebase-admin");
 
-const serviceAccount = require("./motorio-car-firebase-adminsdk-fb.json");
+const decoded = Buffer.from(process.env.FIREBASW_SERVER_BASE, "base64").toString("utf8");
+const serviceAccount = JSON.parse(decoded);
 
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount)
@@ -148,11 +149,11 @@ async function run() {
             res.send(result);
         });
 
-        await client.db("admin").command({ ping: 1 });
+        // await client.db("admin").command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
     } finally {
         // Ensures that the client will close when you finish/error
-        // await client.close();
+        await client.close();
     }
 }
 run().catch(console.dir);

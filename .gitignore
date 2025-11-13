@@ -1,3 +1,4 @@
 node_modules
 .env
 motorio-car-firebase-adminsdk-fb.json
+.vercel
