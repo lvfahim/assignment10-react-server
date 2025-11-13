@@ -6,13 +6,41 @@ const port = process.env.PORT || 5000
 app.use(cors())
 require('dotenv').config()
 app.use(express.json())
+
+const admin = require("firebase-admin");
+
+const serviceAccount = require("./motorio-car-firebase-adminsdk-fb.json");
+
+admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount)
+});
 app.get('/', (req, res) => {
     res.send('Hello World!')
 })
 
+const verifyFBToken = async (req, res, next) => {
+    if (!req.headers.authorization) {
+        return res.status(401).send({ message: 'Unauthorized Access' });
+    }
+
+    const token = req.headers.authorization.split(' ')[1];
+
+    if (!token) {
+        return res.status(401).send({ message: 'Unauthorized Access' });
+    }
+
+    try {
+        const userInfo = await admin.auth().verifyIdToken(token);
+        req.token_email=userInfo.email
+        next();
+    } catch (error) {
+        console.error('Token verification failed:', error);
+        return res.status(401).send({ message: 'Unauthorized Access' });
+    }
+};
+
 const uri = `mongodb+srv://${process.env.BD_USER}:${process.env.BD_PASS}@lvfahimnuman.wnfazhs.mongodb.net/?appName=LvFahimNuman`;
-// Qxw6VgKhFxAJTiA8
-// Motorio
+
 const client = new MongoClient(uri, {
     serverApi: {
         version: ServerApiVersion.v1,
@@ -34,10 +62,13 @@ async function run() {
             const result = await carBookingCollection.insertOne(newBooking)
             res.send(result)
         })
-        app.get('/myBookingList', async (req, res) => {
+        app.get('/myBookingList',verifyFBToken, async (req, res) => {
             const email = req.query.email
             const quary = {}
             if (email) {
+                if(email !== req.token_email){
+                     res.status(403).send({ message: 'Frobidden Access' })
+                }
                 quary.email = email
             }
             const cursor = carBookingCollection.find(quary).sort({ price: -1 })
@@ -77,10 +108,14 @@ async function run() {
             res.send(result)
 
         })
-        app.get('/myCarList', async (req, res) => {
+        app.get('/myCarList', verifyFBToken, async (req, res) => {
+            // console.log(req.headers)
             const email = req.query.email
             const quary = {}
             if (email) {
+                if(email !== req.token_email){
+                    res.status(403).send({ message: 'Frobidden Access' })
+                }
                 quary.providerEmail = email
             }
             const cursor = carDataCollection.find(quary).sort({ price: -1 })
